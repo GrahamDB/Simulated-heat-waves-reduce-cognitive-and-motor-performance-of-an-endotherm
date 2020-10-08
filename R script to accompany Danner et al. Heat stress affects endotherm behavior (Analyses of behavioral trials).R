@@ -25,6 +25,12 @@
 library(nlme)
 library(lme4)
 library(dplyr)
+
+drop.levels <- function (dat) {
+  if (is.factor(dat)) dat <- dat[, drop = TRUE] else dat[] <-
+      lapply(dat, function(x) x[, drop = TRUE]);
+  return(dat) ;}; #define the function to drop removed levels (i.e. individuals of unknown sex)
+
 mods<-list()
 color_trials <- 
   read.csv("color_association_thermal_trials.csv", 
@@ -47,74 +53,74 @@ color_trials[, time_cols] <-
              tz="EST", format="%H:%M:%S")
 
 #Then subtract times to get intervals. 
-d$latency <- d$Touch.tray - d$Cage.door.closed
-d$finish <- d$cor.col.9 - d$Touch.tray
-d$c.dif1 <- d$cor.col.2 - d$cor.col.1
-d$c.dif2 <- d$cor.col.3 - d$cor.col.2
-d$c.dif3 <- d$cor.col.4 - d$cor.col.3
-d$c.dif4 <- d$cor.col.5 - d$cor.col.4
-d$c.dif5 <- d$cor.col.6 - d$cor.col.5
-d$c.dif6 <- d$cor.col.7 - d$cor.col.6
-d$c.dif7 <- d$cor.col.8 - d$cor.col.7
-d$c.dif8 <- d$cor.col.9 - d$cor.col.8
 dif_cols <- paste0("c.dif",1:8)
-d$c.dif.mean <- apply(d[, dif_cols], MARGIN=1, FUN=mean, na.rm=TRUE)
-d$c.dif.sd <- apply(d[, dif_cols], MARGIN=1, FUN=sd, na.rm=TRUE)
-d$c.dif.max <- apply(d[, dif_cols], MARGIN=1, FUN=max, na.rm=TRUE)
+color_trials <-
+  color_trials %>% 
+  mutate(
+latency= Touch.tray - Cage.door.closed,
+finish= cor.col.9 - Touch.tray,
+c.dif1= cor.col.2 - cor.col.1,
+c.dif2= cor.col.3 - cor.col.2,
+c.dif3= cor.col.4 - cor.col.3,
+c.dif4= cor.col.5 - cor.col.4,
+c.dif5= cor.col.6 - cor.col.5,
+c.dif6= cor.col.7 - cor.col.6,
+c.dif7= cor.col.8 - cor.col.7,
+c.dif8= cor.col.9 - cor.col.8 )
 
-d3 <- subset(d, Finish. == "Yes")
-drop.levels <- function (dat) {
-  if (is.factor(dat)) dat <- dat[, drop = TRUE] else dat[] <-
-    lapply(dat, function(x) x[, drop = TRUE]);
-  return(dat) ;}; #define the function to drop removed levels (i.e. individuals of unknown sex)
+color_trials$c.dif.mean <- 
+  apply(color_trials %>% select(one_of(dif_cols)), MARGIN=1, FUN=mean, na.rm=TRUE)
+color_trials$c.dif.sd <- 
+  apply(color_trials %>% select(one_of(dif_cols)), MARGIN=1, FUN=sd, na.rm=TRUE)
+color_trials$c.dif.max <- 
+  apply(color_trials %>% select(one_of(dif_cols)), MARGIN=1, FUN=max, na.rm=TRUE)
 
-d4 <- drop.levels(d3) #run the function to drop removed levels
+color_trials <-
+  color_trials %>% filter(Finish. == "Yes") %>%
+  drop.levels() %>% 
+  mutate(fExam.temp = Exam.temp) # drop removed levels
 
-d4$fExam.temp <- factor(d4$Exam.temp)
-color_details_fin <- color_details %>% filter(Finish. == "Yes") %>% drop.levels() 
-print(with(color_details,
-           table(fExam.temp,HDB,Bird)),zero.print=".")
-# Foraging efficiency
+# Foraging efficiency data 
 
-f <- read.csv("Color Association Thermal Trials/Color Association Thermal Trials Foraging Efficiency (for Dryad).csv", header=TRUE) 
-f$birddate <- paste(f$Bird, f$Date, sep="") 
-f[,c("Seed.1.duration","Seed.2.duration", "Seed.3.duration")] <- 
-  as.POSIXct(as.character(unlist(f[ , c("Seed.1.duration","Seed.2.duration", "Seed.3.duration")])), 
+forage <- 
+  read.csv("color_association_foraging_efficiency.csv", 
+           header=TRUE)  %>%
+  mutate(birddate=paste(Bird, Date, sep=""),
+         fTemp.set=factor(Temp.set))
+# convert time measurements to time difference
+time_cols_f <- c("Seed.1.duration","Seed.2.duration", "Seed.3.duration")
+forage[, time_cols_f] <- 
+  as.POSIXct(as.character(unlist(forage[ , time_cols_f])), 
              tz="EST", format="%H:%M:%S") -
-  as.POSIXct("0:00:00",tz="EST", format="%H:%M:%S")#convert time measurements to time difference
+  as.POSIXct("0:00:00",tz="EST", format="%H:%M:%S") 
 
-f$Seed.duration.mean_old <- 
-  apply(data.frame(f$Seed.1.duration, f$Seed.2.duration, f$Seed.3.duration), MARGIN=1, FUN=mean)
-f$Seed.duration.mean <- 
-  apply(data.frame(f$Seed.1.duration, f$Seed.2.duration, f$Seed.3.duration), MARGIN=1, FUN=mean, na.rm=T)
-f$fTemp.set <- factor(f$Temp.set)
+forage$Seed.duration.mean <- 
+  apply(forage %>% select(one_of(time_cols_f)), MARGIN=1, FUN=mean, na.rm=TRUE)
 
 #1. Time to finish trial
 
-mods$ttfin_glm <-list()
-mods$ttfin_lme4 <-list()
 mods$ttfin_nlme <-list()
-summary(mods$ttfin_glm$Pant <-lm(finish ~ Pant.during.trial + Bird, data=d4))
-summary(mods$ttfin_glm$temp <-lm(finish ~ fExam.temp + Bird, data=d4))
-summary(mods$ttfin_glm$const <-lm(finish ~  Bird, data=d4))
-summary(mods$ttfin_nlme$temp <-lme(finish ~ fExam.temp,random = ~1|Bird, data=d4, method = "ML"))
-summary(mods$ttfin_nlme$const <-lme(finish ~ 1,random = ~1|Bird, data=d4, method = "ML"))
-summary(mods$ttfin_lme4$temp <-lme4::lmer(finish ~ fExam.temp+(1|Bird), data=d4,REML=F))
-summary(mods$ttfin_lme4$const <-lme4::lmer(finish ~ 1+(1|Bird), data=d4,REML=F))
-print(with(mods$ttfin_glm,anova(const,temp)))
+# summary(mods$ttfin_glm$Pant <-lm(finish ~ Pant.during.trial + Bird, data=d4))
+# summary(mods$ttfin_glm$temp <-lm(finish ~ fExam.temp + Bird, data=d4))
+# summary(mods$ttfin_glm$const <-lm(finish ~  Bird, data=d4))
+summary(mods$ttfin_nlme$temp <-lme(finish ~ fExam.temp,random = ~1|Bird, data=color_trials, method = "ML"))
+summary(mods$ttfin_nlme$const <-lme(finish ~ 1,random = ~1|Bird, data=color_trials, method = "ML"))
+# summary(mods$ttfin_lme4$temp <-lme4::lmer(finish ~ fExam.temp+(1|Bird), data=d4,REML=F))
+# summary(mods$ttfin_lme4$const <-lme4::lmer(finish ~ 1+(1|Bird), data=d4,REML=F))
+# print(with(mods$ttfin_glm,anova(const,temp)))
 print(with(mods$ttfin_nlme,anova(const,temp)))
-print(with(mods$ttfin_lme4,anova(const,temp)))
+# print(with(mods$ttfin_lme4,anova(const,temp)))
 
-# #Figure 1A:
-quartz(width=8.7/2.54, title="Draft Figure [DROP1]")
-par(mfrow=c(3,1))
-par(oma=c(0,0,0,0))
-par(mar=c(2.5,4,0.1,0.1) + 0.1) #c(bottom, left, top, right)
-
-plot(finish ~ Pant.during.trial, data=d4, ylab="Time to finish trial (seconds)", 
-     xlab="", xaxt="n", col=c("blue", "red"))
-axis(side=1, at=c(1, 2), labels=c("No", "Yes"))
-legend("topleft", "A", bty="n")
+# # #Figure 1A:
+# quartz(width=8.7/2.54, title="Draft Figure [DROP1]")
+# par(mfrow=c(3,1))
+# par(oma=c(0,0,0,0))
+# par(mar=c(2.5,4,0.1,0.1) + 0.1) #c(bottom, left, top, right)
+# 
+# plot(finish ~ Pant.during.trial, data=d4, ylab="Time to finish trial (seconds)", 
+#      xlab="", xaxt="n", col=c("blue", "red"))
+# axis(side=1, at=c(1, 2), labels=c("No", "Yes"))
+# legend("topleft", "A", bty="n")
 
 #2. Time between flips
 mods$ttflip_glm <-list()
