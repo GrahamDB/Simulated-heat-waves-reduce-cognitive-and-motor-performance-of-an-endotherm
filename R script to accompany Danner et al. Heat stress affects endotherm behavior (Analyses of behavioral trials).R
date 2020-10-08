@@ -183,51 +183,51 @@ print(with(mods$latency_nlme,anova(const,temp)))
 # axis(side=1, at=c(1, 2), labels=c("No", "Yes"))
 # legend("topleft", "C", bty="n")
 
-#4. Accuracy of color association
-mods$acc_glm <-list()
+# 5. Accuracy of color association
+# mods$acc_glm <-list()
 mods$acc_lme4 <-list()
-mods$acc2_lme4 <-list()
-mods$acc_nlme <-list()
-summary(mods$acc_glm$pant <- 
-          glm(Error.ratio ~ Pant.during.trial + Bird, data=d4, 
-              family = binomial, weights=rep(9,nrow(d4))))
-summary(mods$acc_glm$temp <- 
-          glm(Error.ratio ~ fExam.temp + Bird, data=d4, 
-             family = binomial, weights=rep(9,nrow(d4))))
-summary(mods$acc_glm$const <- 
-          glm(Error.ratio ~ Bird, data=d4, 
-             family = binomial, weights=rep(9,nrow(d4))))
+# mods$acc2_lme4 <-list()
+# mods$acc_nlme <-list()
+# summary(mods$acc_glm$pant <- 
+#           glm(Error.ratio ~ Pant.during.trial + Bird, data=d4, 
+#               family = binomial, weights=rep(9,nrow(d4))))
+# summary(mods$acc_glm$temp <- 
+#           glm(Error.ratio ~ fExam.temp + Bird, data=d4, 
+#              family = binomial, weights=rep(9,nrow(d4))))
+# summary(mods$acc_glm$const <- 
+#           glm(Error.ratio ~ Bird, data=d4, 
+#              family = binomial, weights=rep(9,nrow(d4))))
 summary(mods$acc_lme4$temp <-
-          lme4::glmer(Error.ratio ~ fExam.temp+(1|Bird), data=d4,
-                      family = binomial, weights=rep(9,nrow(d4))))
+          lme4::glmer(Error.ratio ~ fExam.temp+(1|Bird), data=color_trials,
+                      family = binomial, weights=rep(9,nrow(color_trials))))
 summary(mods$acc_lme4$const <-
-          lme4::glmer(Error.ratio ~ 1+(1|Bird), data=d4,
-                      family = binomial, weights=rep(9,nrow(d4))))
-summary(mods$acc2_lme4$temp <-
-          lme4::glmer(cbind(Error.count,9-Error.count) ~ fExam.temp+(1|Bird), 
-                      data=d4 %>% mutate(Error.count=Error.ratio*9),
-                      family = binomial))
-summary(mods$acc2_lme4$const <-
-          lme4::glmer(cbind(Error.count,9-Error.count) ~ 1+(1|Bird), 
-                      data=d4 %>% mutate(Error.count=Error.ratio*9),
-                      family = binomial))
+          lme4::glmer(Error.ratio ~ 1+(1|Bird), data=color_trials,
+                      family = binomial, weights=rep(9,nrow(color_trials))))
+# summary(mods$acc2_lme4$temp <-
+#           lme4::glmer(cbind(Error.count,9-Error.count) ~ fExam.temp+(1|Bird), 
+#                       data=d4 %>% mutate(Error.count=Error.ratio*9),
+#                       family = binomial))
+# summary(mods$acc2_lme4$const <-
+#           lme4::glmer(cbind(Error.count,9-Error.count) ~ 1+(1|Bird), 
+#                       data=d4 %>% mutate(Error.count=Error.ratio*9),
+#                       family = binomial))
 # summary(mods$acc_nlme$temp <-lme(Error.ratio ~ fExam.temp,random = ~1|Bird, data=d4, method = "ML"))
 # summary(mods$acc_nlme$const <-lme(Error.ratio ~ 1,random = ~1|Bird, data=d4, method = "ML"))
-print(with(mods$acc_glm,anova(const,temp)))
+# print(with(mods$acc_glm,anova(const,temp)))
 print(with(mods$acc_lme4,anova(const,temp)))
-print(with(mods$acc2_lme4,anova(const,temp)))
-summary(mods$acc2_lme4$temp)
+# print(with(mods$acc2_lme4,anova(const,temp)))
+summary(mods$acc_lme4$temp)
  #Figure 2A:
-quartz(width=8.7/2.54, title="Draft Figure 2 [REWORK]")
-par(mfrow=c(2,1))
-par(oma=c(0,0,0,0))
-par(mar=c(2.5,4.1,0.2,0.1) + 0.1) #c(bottom, left, top, right)
-par(cex=1)
-boxplot(Error.ratio ~ Pant.during.trial, data=d4, ylab="Error ratio", 
-        xaxt="n", col=c("blue", "red"), cex=1, cex.axis=1, cex.lab=1)
-axis(side=1, at=c(1, 2), labels=c("", ""), cex.axis=1)
-axis(side=1, at=c(1, 2.05), tick=FALSE, labels=c("No", "Yes"), cex.axis=1) 
-legend("topleft", "A", bty="n", cex=1)
+# quartz(width=8.7/2.54, title="Draft Figure 2 [REWORK]")
+# par(mfrow=c(2,1))
+# par(oma=c(0,0,0,0))
+# par(mar=c(2.5,4.1,0.2,0.1) + 0.1) #c(bottom, left, top, right)
+# par(cex=1)
+# boxplot(Error.ratio ~ Pant.during.trial, data=d4, ylab="Error ratio", 
+#         xaxt="n", col=c("blue", "red"), cex=1, cex.axis=1, cex.lab=1)
+# axis(side=1, at=c(1, 2), labels=c("", ""), cex.axis=1)
+# axis(side=1, at=c(1, 2.05), tick=FALSE, labels=c("No", "Yes"), cex.axis=1) 
+# legend("topleft", "A", bty="n", cex=1)
 
 #5. Missed food rewards
 mods$seed_glm <-list()
