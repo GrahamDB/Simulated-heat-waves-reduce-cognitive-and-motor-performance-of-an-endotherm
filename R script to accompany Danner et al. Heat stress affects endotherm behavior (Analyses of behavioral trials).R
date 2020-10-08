@@ -229,14 +229,14 @@ summary(mods$acc_lme4$temp)
 # axis(side=1, at=c(1, 2.05), tick=FALSE, labels=c("No", "Yes"), cex.axis=1) 
 # legend("topleft", "A", bty="n", cex=1)
 
-#5. Missed food rewards
-mods$seed_glm <-list()
+# 6. Missed food rewards
+# mods$seed_glm <-list()
 mods$seed_lme4 <-list()
-mods$seed_nlme <-list()
-f_seeds <- f %>% filter(is.finite(Num.seeds.eaten))
-summary(mods$seed_glm$pant <-lm(cbind(Num.seeds.eaten,3-Num.seeds.eaten) ~ Pant + Bird, data=f_seeds, family= binomial)) 
-summary(mods$seed_glm$temp <-lm(cbind(Num.seeds.eaten,3-Num.seeds.eaten) ~ fTemp.set + Bird, data=f_seeds)) 
-summary(mods$seed_glm$const <-lm(cbind(Num.seeds.eaten,3-Num.seeds.eaten) ~ Bird, data=f_seeds)) 
+# mods$seed_nlme <-list()
+f_seeds <- forage %>% filter(is.finite(Num.seeds.eaten))
+# summary(mods$seed_glm$pant <-lm(cbind(Num.seeds.eaten,3-Num.seeds.eaten) ~ Pant + Bird, data=f_seeds, family= binomial)) 
+# summary(mods$seed_glm$temp <-lm(cbind(Num.seeds.eaten,3-Num.seeds.eaten) ~ fTemp.set + Bird, data=f_seeds)) 
+# summary(mods$seed_glm$const <-lm(cbind(Num.seeds.eaten,3-Num.seeds.eaten) ~ Bird, data=f_seeds)) 
 summary(mods$seed_lme4$temp <-
           lme4::glmer(cbind(Num.seeds.eaten,3-Num.seeds.eaten) ~ fTemp.set+( 1|Bird), 
                 data=f_seeds, family=binomial))
@@ -245,14 +245,14 @@ summary(mods$seed_lme4$const <-
                 data=f_seeds, family=binomial))
 print(with(mods$seed_lme4,anova(const,temp)))
 
-#Figure 2B:
-par(mar=c(4,4.1,0.1,0.1) + 0.1) #c(bottom, left, top, right) 
-boxplot(Num.seeds.eaten ~ Pant, data=f, xlab="Sign of thermal stress",
-        ylab="Number of seeds eaten", yaxt="n", xaxt="n", col=c("blue", "red"), cex=1, cex.axis=1, cex.lab=1)
-axis(2, at=sort(unique(round(f$Num.seeds.eaten))), labels=c(0,1,2,3), cex.axis=1)
-axis(side=1, at=c(1, 2), labels=c("", ""), cex.axis=1)
-axis(side=1, at=c(1, 2.05), tick=FALSE, labels=c("No", "Yes"), cex.axis=1) 
-legend("topleft", "B", bty="n", cex=1)
+# #Figure 2B:
+# par(mar=c(4,4.1,0.1,0.1) + 0.1) #c(bottom, left, top, right) 
+# boxplot(Num.seeds.eaten ~ Pant, data=f, xlab="Sign of thermal stress",
+#         ylab="Number of seeds eaten", yaxt="n", xaxt="n", col=c("blue", "red"), cex=1, cex.axis=1, cex.lab=1)
+# axis(2, at=sort(unique(round(f$Num.seeds.eaten))), labels=c(0,1,2,3), cex.axis=1)
+# axis(side=1, at=c(1, 2), labels=c("", ""), cex.axis=1)
+# axis(side=1, at=c(1, 2.05), tick=FALSE, labels=c("No", "Yes"), cex.axis=1) 
+# legend("topleft", "B", bty="n", cex=1)
 
 #########################
 #End I. Color Association
