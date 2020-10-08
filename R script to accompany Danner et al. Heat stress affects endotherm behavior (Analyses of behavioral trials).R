@@ -161,25 +161,27 @@ print(with(mods$tthusk_nlme,anova(const,temp)))
 print(summary(mods$tthusk_nlme$temp)$tTable)
 # print(summary(mods$tthusk_glm$temp)$coefficients)
 
-## XXX Latency to begin
-mods$latency_glm <-list()
-mods$latency_lme4 <-list()
+## 4. Latency to begin
+# mods$latency_glm <-list()
+# mods$latency_lme4 <-list()
 mods$latency_nlme <-list()
-d_latency<- d4 %>% filter(is.finite(latency))
-summary(mods$latency_glm$temp <-lm(latency ~ fExam.temp + Bird, data=d_latency))
-summary(mods$latency_glm$const <-lm(latency ~  Bird, data=d_latency))
-summary(mods$latency_nlme$temp <-lme(latency ~ fExam.temp,random = ~1|Bird, data=d_latency, method = "ML"))
-summary(mods$latency_nlme$const <-lme(latency ~ 1,random = ~1|Bird, data=d_latency, method = "ML"))
-print(with(mods$latency_glm,anova(const,temp)))
+d_latency<- color_trials %>% filter(is.finite(latency))
+# summary(mods$latency_glm$temp <-lm(latency ~ fExam.temp + Bird, data=d_latency))
+# summary(mods$latency_glm$const <-lm(latency ~  Bird, data=d_latency))
+summary(mods$latency_nlme$temp <-
+          lme(latency ~ fExam.temp,random = ~1|Bird, data=d_latency, method = "ML"))
+summary(mods$latency_nlme$const <-
+          lme(latency ~ 1,random = ~1|Bird, data=d_latency, method = "ML"))
+# print(with(mods$latency_glm,anova(const,temp)))
 print(with(mods$latency_nlme,anova(const,temp)))
 
-#Figure 1C:
-par(mar=c(4,4,0.1,0.1) + 0.1) #c(bottom, left, top, right) 
-boxplot(Seed.duration.mean ~ Pant, data=f, xlab="Sign of thermal stress", 
-        ylab="Time to eat one seed (sec)", yaxt="n", xaxt="n", col=c("blue", "red"))
-axis(2, at=sort(unique(round(f$Seed.duration.mean))), labels=c(1,2,3))
-axis(side=1, at=c(1, 2), labels=c("No", "Yes"))
-legend("topleft", "C", bty="n")
+# #Figure 1C:
+# par(mar=c(4,4,0.1,0.1) + 0.1) #c(bottom, left, top, right) 
+# boxplot(Seed.duration.mean ~ Pant, data=f, xlab="Sign of thermal stress", 
+#         ylab="Time to eat one seed (sec)", yaxt="n", xaxt="n", col=c("blue", "red"))
+# axis(2, at=sort(unique(round(f$Seed.duration.mean))), labels=c(1,2,3))
+# axis(side=1, at=c(1, 2), labels=c("No", "Yes"))
+# legend("topleft", "C", bty="n")
 
 #4. Accuracy of color association
 mods$acc_glm <-list()
