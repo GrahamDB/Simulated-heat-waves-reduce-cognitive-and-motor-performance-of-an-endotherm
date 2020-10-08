@@ -262,24 +262,13 @@ print(with(mods$seed_lme4,anova(const,temp)))
 #II. Detour Reaching
 ####################  
  
-## Missing???
-library(dplyr)
-detour_details <- read.csv("Detour Reaching Thermal Trials/Detour Reaching Thermal Trials Notes.csv", header=TRUE)
-length(unique(detour_details$Bird))
-names(detour_details)
-print(with(detour_details %>% filter(Pass..y.n. %in% "y") %>%
-             mutate(HDB=paste0(Pant..y.n.,
-                               substr(Stand.tall..y.n.,1,1),
-                               substr(Spread.wings.y.n.,1,1))),
-           table(Trial.type,HDB,Bird)),zero.print=".")
 
-
-#1. Number of trials
-detour <- read.csv("Detour Reaching Thermal Trials/Detour Reaching Thermal Trials Results (for Dryad).csv", header=TRUE)
-detour$Date <- as.Date(detour$Date, format = "%m/%d/%y", origin = "1899-12-30") 
-detour$Trial.temp <- c(Ambient=22, High=44)[as.character(detour$Trial.type)]
-library("nlme")
-# m1 <- lme(Num.trials ~ Trial.type, random = ~ 1|Ind, data=detour)
+# 1. Number of trials
+detour <- 
+  read.csv("detour_reaching_thermal_trials.csv", 
+           header=TRUE) %>% 
+  mutate(Date=as.Date(Date, format = "%m/%d/%y", origin = "1899-12-30"),
+         Trial.temp=c(Ambient=22, High=44)[as.character(Trial.type)])
 mods$detour <-list()
 mods$detour$temp <- glmer(Num.trials ~ Trial.type+( 1|Ind),
                           data=detour, family=poisson)
@@ -288,30 +277,29 @@ mods$detour$const <- glmer(Num.trials ~ 1+( 1|Ind),
 summary(mods$detour$temp)
 with(mods$detour,anova(const,temp))
 library("r2glmm")
-r2beta(m1, method="sgv")
+r2beta(mods$detour$temp, method="sgv")
 
- #Figure 3:
-quartz(width=8.7/2.54, height=8.7/2.54, title="Draft Figure 4")
-par(mfrow=c(1,1))
-par(oma=c(0,0,0,0))
-par(mar=c(4.1,4.1,0.2,0.1) + 0.1) #c(bottom, left, top, right)
+# #Figure 3:
+# quartz(width=8.7/2.54, height=8.7/2.54, title="Draft Figure 4")
+# par(mfrow=c(1,1))
+# par(oma=c(0,0,0,0))
+# par(mar=c(4.1,4.1,0.2,0.1) + 0.1) #c(bottom, left, top, right)
+# 
+# plot(Num.trials ~ rep(c(1,2), length(detour$Num.trials)/2), data=detour, 
+#      ylab="Number of trials", xlab="Trial temperature (ºC)", xlim=c(0.75, 2.25), xaxt="n", type="n")
+# axis(side=1, at=c(1, 2), labels=c("22", "44"))
+# for(p in unique(detour$Ind)){
+# 		g <- subset(detour, Ind == p)
+# 		lines(x=c(g[1, 2], g[2, 2]), y=c(g[1, 5], g[2, 5]), col="gray", type="l")
+# 		}
+#  #Add means and s.e.
+# library("Hmisc")
+# errbar(x=1, y=6.67, 6.67+1.13, 6.67-1.13, add=TRUE, errbar.col="blue", col="blue", cex=1.5)
+# 
+# library("Hmisc")
+# errbar(x=2, y=9.67, 9.67+0.96, 9.67-0.96, add=TRUE, errbar.col="red", col="red", cex=1.5)
 
-plot(Num.trials ~ rep(c(1,2), length(detour$Num.trials)/2), data=detour, 
-     ylab="Number of trials", xlab="Trial temperature (ºC)", xlim=c(0.75, 2.25), xaxt="n", type="n")
-axis(side=1, at=c(1, 2), labels=c("22", "44"))
-for(p in unique(detour$Ind)){
-		g <- subset(detour, Ind == p)
-		lines(x=c(g[1, 2], g[2, 2]), y=c(g[1, 5], g[2, 5]), col="gray", type="l")
-		}
- #Add means and s.e.
-library("Hmisc")
-errbar(x=1, y=6.67, 6.67+1.13, 6.67-1.13, add=TRUE, errbar.col="blue", col="blue", cex=1.5)
 
-library("Hmisc")
-errbar(x=2, y=9.67, 9.67+0.96, 9.67-0.96, add=TRUE, errbar.col="red", col="red", cex=1.5)
-
-m2 <- lme(Num.trials ~ Sess.num, random = ~ 1|Ind, data=detour)
-summary(m2)
 mods$detour$sess <- glmer(Num.trials ~ Sess.num+( 1|Ind),
                           data=detour, family=poisson)
 summary(mods$detour$sess)
