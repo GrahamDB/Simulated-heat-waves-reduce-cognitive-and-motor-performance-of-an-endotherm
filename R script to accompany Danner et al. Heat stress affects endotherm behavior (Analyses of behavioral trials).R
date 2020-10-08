@@ -95,7 +95,7 @@ forage[, time_cols_f] <-
   as.POSIXct("0:00:00",tz="EST", format="%H:%M:%S") 
 
 forage$Seed.duration.mean <- 
-  apply(forage %>% select(one_of(time_cols_f)), MARGIN=1, FUN=mean, na.rm=TRUE)
+  apply(forage %>% select(one_of(time_cols_f)), MARGIN=1, FUN=mean, na.rm=F)
 
 #1. Time to finish trial
 
@@ -123,37 +123,43 @@ print(with(mods$ttfin_nlme,anova(const,temp)))
 # legend("topleft", "A", bty="n")
 
 #2. Time between flips
-mods$ttflip_glm <-list()
-mods$ttflip_lme4 <-list()
+# mods$ttflip_glm <-list()
+# mods$ttflip_lme4 <-list()
 mods$ttflip_nlme <-list()
-summary(mods$ttflip_glm$pant<- lm(c.dif.mean ~ Pant.during.trial + Bird, data=d4 %>% filter(is.finite(c.dif.mean))))
-summary(mods$ttflip_glm$temp <- lm(c.dif.mean ~ fExam.temp + Bird, data=d4 %>% filter(is.finite(c.dif.mean))))
-summary(mods$ttflip_glm$const <- lm(c.dif.mean ~ 1 + Bird, data=d4 %>% filter(is.finite(c.dif.mean))))
-summary(mods$ttflip_nlme$temp <-lme(c.dif.mean ~ fExam.temp,random = ~1|Bird, data=d4 %>% filter(is.finite(c.dif.mean)), method = "ML"))
-summary(mods$ttflip_nlme$const <-lme(c.dif.mean ~ 1,random = ~1|Bird, data=d4 %>% filter(is.finite(c.dif.mean)), method = "ML"))
-print(with(mods$ttflip_glm,anova(const,temp)))
+# summary(mods$ttflip_glm$pant<- lm(c.dif.mean ~ Pant.during.trial + Bird, data=d4 %>% filter(is.finite(c.dif.mean))))
+# summary(mods$ttflip_glm$temp <- lm(c.dif.mean ~ fExam.temp + Bird, data=d4 %>% filter(is.finite(c.dif.mean))))
+# summary(mods$ttflip_glm$const <- lm(c.dif.mean ~ 1 + Bird, data=d4 %>% filter(is.finite(c.dif.mean))))
+summary(mods$ttflip_nlme$temp <-
+          lme(c.dif.mean ~ fExam.temp,random = ~1|Bird, 
+              data=color_trials %>% filter(is.finite(c.dif.mean)), method = "ML"))
+summary(mods$ttflip_nlme$const <-
+          lme(c.dif.mean ~ 1,random = ~1|Bird, 
+              data=color_trials %>% filter(is.finite(c.dif.mean)), method = "ML"))
+# print(with(mods$ttflip_glm,anova(const,temp)))
 print(with(mods$ttflip_nlme,anova(const,temp)))
-#Figure 1B:
-plot(c.dif.mean ~ Pant.during.trial, data=d4, ylab="Time between lids (seconds)", 
-     xlab="", xaxt="n", col=c("blue", "red"))
-axis(side=1, at=c(1, 2), labels=c("No", "Yes"))
-legend("topleft", "B", bty="n")
+# #Figure 1B:
+# plot(c.dif.mean ~ Pant.during.trial, data=d4, ylab="Time between lids (seconds)", 
+#      xlab="", xaxt="n", col=c("blue", "red"))
+# axis(side=1, at=c(1, 2), labels=c("No", "Yes"))
+# legend("topleft", "B", bty="n")
 
 #3. Time to husk seeds
-mods$tthusk_glm <-list()
-mods$tthusk_lme4 <-list()
+# mods$tthusk_glm <-list()
+# mods$tthusk_lme4 <-list()
 mods$tthusk_nlme <-list()
 # f_husk <- f %>% filter(is.finite(Seed.duration.mean))
-f_husk <- f %>% filter(is.finite(Seed.duration.mean_old))
-summary(mods$tthusk_glm$pant <- lm(Seed.duration.mean ~ Pant + Bird, data=f_husk))
-summary(mods$tthusk_glm$temp <- lm(Seed.duration.mean ~ fTemp.set + Bird, data=f_husk))
-summary(mods$tthusk_glm$const <- lm(Seed.duration.mean ~ Bird, data=f_husk))
-summary(mods$tthusk_nlme$temp <-lme(Seed.duration.mean ~ fTemp.set,random = ~1|Bird, data=f_husk, method = "ML"))
-summary(mods$tthusk_nlme$const <-lme(Seed.duration.mean ~ 1,random = ~1|Bird, data=f_husk, method = "ML"))
-print(with(mods$tthusk_glm,anova(const,temp)))
+f_husk <- forage %>% filter(is.finite(Seed.duration.mean))
+# summary(mods$tthusk_glm$pant <- lm(Seed.duration.mean ~ Pant + Bird, data=f_husk))
+# summary(mods$tthusk_glm$temp <- lm(Seed.duration.mean ~ fTemp.set + Bird, data=f_husk))
+# summary(mods$tthusk_glm$const <- lm(Seed.duration.mean ~ Bird, data=f_husk))
+summary(mods$tthusk_nlme$temp <-
+          lme(Seed.duration.mean ~ fTemp.set,random = ~1|Bird, data=f_husk, method = "ML"))
+summary(mods$tthusk_nlme$const <-
+          lme(Seed.duration.mean ~ 1,random = ~1|Bird, data=f_husk, method = "ML"))
+# print(with(mods$tthusk_glm,anova(const,temp)))
 print(with(mods$tthusk_nlme,anova(const,temp)))
 print(summary(mods$tthusk_nlme$temp)$tTable)
-print(summary(mods$tthusk_glm$temp)$coefficients)
+# print(summary(mods$tthusk_glm$temp)$coefficients)
 
 ## XXX Latency to begin
 mods$latency_glm <-list()
