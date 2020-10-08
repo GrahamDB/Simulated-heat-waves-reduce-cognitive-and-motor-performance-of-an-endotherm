@@ -24,17 +24,15 @@
 #####################
 library(nlme)
 library(lme4)
+library(dplyr)
 mods<-list()
-d <- read.csv("Color Association Thermal Trials/Color Association Thermal Trials (for Dryad).csv", header=TRUE) 
-d$Date <- as.Date(d$Date, format = "%m/%d/%y", origin = "1899-12-30")
-color_details <- 
-  read.csv("Color Association Thermal Trials/Color Association Thermal Trials (17.8.22).csv",
-           header=TRUE) %>% mutate(Date=as.Date(Date, format = "%m/%d/%y", origin = "1899-12-30"))%>%
-  mutate(fExam.temp = Exam.temp.2)%>%
-  mutate(HDB=paste0(Pant.during.trial.2,
-                    substr(Stand.tall.during.exam,1,1),
-                    substr(Spread.wings.during.exam,1,1)))
- #Convert time during video to time format.
+color_trials <- 
+  read.csv("color_association_thermal_trials.csv", 
+           header=TRUE) %>% 
+  mutate(Date=as.Date(Date, format = "%m/%d/%y", origin = "1899-12-30")) %>%
+  mutate(fExam.temp = Exam.temp)
+
+# Convert time during video to time format.
 time_cols <- 
   c("Cage.door.closed","Touch.tray",
     "cor.col.1", "cor.col.2", "cor.col.3",
@@ -44,12 +42,10 @@ time_cols <-
     "inc.col.1", "inc.col.2", "inc.col.3",
     "inc.col.4", "inc.col.5", "inc.col.6",
     "inc.col.7", "inc.col.8", "inc.col.9")
-d[, time_cols] <- 
-  as.POSIXct(as.character(unlist(d[ , time_cols])), 
+color_trials[, time_cols] <- 
+  as.POSIXct(as.character(unlist(color_trials[ , time_cols])), 
              tz="EST", format="%H:%M:%S")
-color_details[, time_cols] <- 
-  as.POSIXct(as.character(unlist(color_details[ , time_cols])), 
-             tz="EST", format="%H:%M:%S")
+
 #Then subtract times to get intervals. 
 d$latency <- d$Touch.tray - d$Cage.door.closed
 d$finish <- d$cor.col.9 - d$Touch.tray
