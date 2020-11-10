@@ -37,7 +37,7 @@ color_trials <-
   read.csv("color_association_thermal_trials.csv", 
            header=TRUE) %>% 
   mutate(Date=as.Date(Date, format = "%m/%d/%y", origin = "1899-12-30")) %>%
-  mutate(fExam.temp = Exam.temp)
+  mutate(fExam.temp = factor(Exam.temp))
 
 # Convert time during video to time format.
 time_cols <- 
@@ -79,7 +79,7 @@ color_trials$c.dif.max <-
 color_trials <-
   color_trials %>% filter(Finish. == "Yes") %>%
   drop.levels() %>% 
-  mutate(fExam.temp = Exam.temp) # drop removed levels
+  mutate(fExam.temp = factor(Exam.temp)) # drop removed levels
 
 # Foraging efficiency data 
 forage <- 
