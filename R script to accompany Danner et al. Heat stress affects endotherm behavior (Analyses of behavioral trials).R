@@ -1,7 +1,7 @@
 #####################
 #Analyses of behavioral trials
 
-#R script to accompany Danner, Coomes, and Derryberry. Simulated heat waves reduce cognitive and motor performance of an endotherm. Proceedings of the Royal Society B. 
+#R script to accompany Danner, Coomes, and Derryberry. Simulated heat waves reduce cognitive and motor performance of an endotherm. Ecology and Evolution.
 #####################
 
 #####################
